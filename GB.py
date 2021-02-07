@@ -77,9 +77,6 @@ async def on_message(message):
 		if choice == "kingdom hearts":
 			game_music('kingdomhearts')
 			await message.channel.send(song)		
-		if choice == "assassins creed":
-			game_music('seashanties')
-			await message.channel.send(song)
 		if choice == "katamari demacy":
 			game_music('katamari')
 			await message.channel.send(song)	
