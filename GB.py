@@ -147,7 +147,7 @@ async def hltb(ctx, *args):
 	title = args
 	query = "howlongtobeat.com" + str(title)
 	for link in search(query, tld="co.in", num=1, stop=1, pause=0.5):
-		page = requests.get(link)
+		page = requests.get(link, headers={'User-Agent': 'Mozilla/5.0'})
 		soup = BeautifulSoup(page.content, 'html.parser')
 		#----------------------
 		# GETTING THE GAME INFO
