@@ -5,4 +5,6 @@ zelda
 star fox
 ace attorney
 kingdom hearts
+assassins creed
 katamari demacy
+splatoon
