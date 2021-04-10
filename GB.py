@@ -15,6 +15,8 @@ from googlesearch import search
 SCORES = {}
 MUSIC_COMMANDS = ['game-bot play some music', 'gamebot play some music', 'game-bot play music', 'gamebot play music', 'game-bot music', 'gamebot music']
 song = []
+party_words = ['party or die', 'party parrot']
+party_replies = ['Parrots Be Vibin', 'Party or Die!', 'Party Time!']
 #COMMAND WORDS TO LISTEN FOR
 
 bot = commands.Bot(command_prefix = '?')
@@ -31,6 +33,14 @@ async def on_ready():
 async def on_message(message):
 	if message.author == bot.user:
 		return	
+	if any(x in message.content.lower() for x in party_words):
+		path ='./PARTY_OR_DIE'
+		files = os.listdir(path)
+		index = random.randrange(0, len(files))
+		party_parrot = files[index]
+		print(party_parrot)
+		await message.channel.send(file=discord.File("./PARTY_OR_DIE/" + party_parrot))
+		await message.channel.send(random.choice(party_replies))		
 	if any(x in message.content.lower() for x in MUSIC_COMMANDS):
 		await message.channel.send('Choose a game franchise from the following list:')
 		file = open("text/music_list.txt")
@@ -55,7 +65,6 @@ async def on_message(message):
 		except asyncio.TimeoutError:
 			return await ctx.send("Sorry you took too long")
 		choice = entry.content.lower()
-		# SOME EXAMPLES, THIS LIST IS FOUND IN MUSIC_LIST.TXT
 		if choice == "fire emblem":
 			game_music('fe')
 			await message.channel.send(song)
@@ -77,8 +86,14 @@ async def on_message(message):
 		if choice == "kingdom hearts":
 			game_music('kingdomhearts')
 			await message.channel.send(song)		
+		if choice == "assassins creed":
+			game_music('seashanties')
+			await message.channel.send(song)
 		if choice == "katamari demacy":
 			game_music('katamari')
+			await message.channel.send(song)
+		if choice == "splatoon":
+			game_music('splatoon')
 			await message.channel.send(song)	
 	#This line is necessary, otherwise it will play this event only when receiving messages and ignore the commands		
 	await bot.process_commands(message)
@@ -96,7 +111,6 @@ async def ping(ctx):
 # SCOREBOARD FUNCTIONALITY
 @bot.command()
 #put the role in here that you want to give scoreboard access to
-#If you want everyone to have access, simply delete this next line
 @commands.has_any_role('Admin')
 async def score(ctx, arg):
 	global SCORES
@@ -114,7 +128,6 @@ async def score(ctx, arg):
 		
 @bot.command()
 #put the role in here that you want to give scoreboard access to
-#If you want everyone to have access, simply delete this next line
 @commands.has_any_role('Admin')
 async def remove_score(ctx, arg):
 	global SCORES
@@ -126,7 +139,6 @@ async def remove_score(ctx, arg):
 		await ctx.send(user + " not on the scoreboard")			
 @bot.command()
 #put the role in here that you want to give scoreboard access to
-#If you want everyone to have access, simply delete this next line
 @commands.has_any_role('Admin')
 async def clear_scores(ctx):
 	global SCORES
@@ -149,6 +161,8 @@ async def hltb(ctx, *args):
 	for link in search(query, tld="co.in", num=1, stop=1, pause=0.5):
 		page = requests.get(link, headers={'User-Agent': 'Mozilla/5.0'})
 		soup = BeautifulSoup(page.content, 'html.parser')
+		#print(link)
+		#print(soup)
 		#----------------------
 		# GETTING THE GAME INFO
 		results = soup.find_all("div", {"class": "game_times"})
@@ -157,7 +171,7 @@ async def hltb(ctx, *args):
 		#-----------------------
 		# GETTING THE GAME TITLE
 		game_title = soup.find("title")
-		G_TITLE = game_title.get_text() 
+		G_TITLE = game_title.get_text()
 		#-----------------------
 		# GETTING THE GAME ICON
 		game_images = soup.find_all("img", {"alt": "Box Art"})
@@ -166,10 +180,10 @@ async def hltb(ctx, *args):
 		print(image)
 		#-----------------------
 		embed=discord.Embed(title=G_TITLE, url=link, description="", color=0x1300d9)
-		embed.set_thumbnail(url=image)
+		embed.set_thumbnail(url="https://howlongtobeat.com" + image)
 		embed.add_field(name="Estimated Completion Time", value=INFO, inline=True)
 		embed.set_footer(text="howlongtobeat.com")
 		await ctx.send(embed=embed)
-
+		
 #Runs the bot and authorizes the bot with it's unique token
-bot.run('')
+bot.run('BOT TOKEN')
