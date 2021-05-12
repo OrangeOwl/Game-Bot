@@ -15,8 +15,6 @@ from googlesearch import search
 SCORES = {}
 MUSIC_COMMANDS = ['game-bot play some music', 'gamebot play some music', 'game-bot play music', 'gamebot play music', 'game-bot music', 'gamebot music']
 song = []
-party_words = ['party or die', 'party parrot']
-party_replies = ['Parrots Be Vibin', 'Party or Die!', 'Party Time!']
 #COMMAND WORDS TO LISTEN FOR
 
 bot = commands.Bot(command_prefix = '?')
@@ -32,15 +30,7 @@ async def on_ready():
 @bot.event
 async def on_message(message):
 	if message.author == bot.user:
-		return	
-	if any(x in message.content.lower() for x in party_words):
-		path ='./PARTY_OR_DIE'
-		files = os.listdir(path)
-		index = random.randrange(0, len(files))
-		party_parrot = files[index]
-		print(party_parrot)
-		await message.channel.send(file=discord.File("./PARTY_OR_DIE/" + party_parrot))
-		await message.channel.send(random.choice(party_replies))		
+		return			
 	if any(x in message.content.lower() for x in MUSIC_COMMANDS):
 		await message.channel.send('Choose a game franchise from the following list:')
 		file = open("text/music_list.txt")
