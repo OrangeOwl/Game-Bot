@@ -23,7 +23,6 @@ If you want to download this source code for editing yourself, follow the steps 
   <li>Then open the folder "text/games"</li>
   <li>Make a text file for each music choice you made in music_list.txt</li>
   <li>In these text files, place urls for video game music you like from Youtube</li>
-  <li>In this file, paste all your favourite Anime song URLs (generally from Youtube)</li>
     <ol>
       <li>Place one URL per line, leave NO empty lines!</li>
     </ol>
