@@ -1,4 +1,3 @@
-# coding=utf-8
 import os
 import discord
 import asyncio
@@ -55,6 +54,8 @@ async def on_message(message):
 		except asyncio.TimeoutError:
 			return await ctx.send("Sorry you took too long")
 		choice = entry.content.lower()
+		# In this section, change the "choice == "GAME TITLE"" with the games you chose to have in the text/games folder
+		# for "game_music(X)", make sure X matches your game list text files
 		if choice == "fire emblem":
 			game_music('fe')
 			await message.channel.send(song)
@@ -146,13 +147,13 @@ async def scores(ctx):
 				
 @bot.command()
 async def hltb(ctx, *args):
+	# grab the first search result for the game (99% of the time is the proper HLTB website page you want)
 	title = args
 	query = "howlongtobeat.com" + str(title)
 	for link in search(query, tld="co.in", num=1, stop=1, pause=0.5):
+		# Now the web-scraping begins
 		page = requests.get(link, headers={'User-Agent': 'Mozilla/5.0'})
 		soup = BeautifulSoup(page.content, 'html.parser')
-		#print(link)
-		#print(soup)
 		#----------------------
 		# GETTING THE GAME INFO
 		results = soup.find_all("div", {"class": "game_times"})
