@@ -3,7 +3,7 @@
 A Video Game Discord bot that can run various commands
 <ul>
   <li>Give you info on the length of Video Games</li> 
-  <li>Post Game music links from a seletion of your choosing</li> 
+  <li>Post Game music links from a selection of your choosing</li> 
   <li>Score Keeping Features</li> 
   <li>And with the source code available to you, even more commands can be added!</li>
 </ul> 
