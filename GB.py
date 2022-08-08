@@ -150,7 +150,7 @@ async def hltb(ctx, *args):
 	# grab the first search result for the game (99% of the time is the proper HLTB website page you want)
 	title = args
 	query = "howlongtobeat.com" + str(title)
-	for link in search(query, tld="co.in", num=1, stop=1, pause=0.5):
+	for link in search(query, num_results=1):
 		# Now the web-scraping begins
 		page = requests.get(link, headers={'User-Agent': 'Mozilla/5.0'})
 		soup = BeautifulSoup(page.content, 'html.parser')
