@@ -183,4 +183,4 @@ async def hltb(ctx, *args):
 	await ctx.send(embed=embed)
 
 #Runs the bot and authorizes the bot with it's unique token
-bot.run('ODA0OTM4MTg0Njk3NzA4NTY1.YBTnGg.8kqBNrzUu7ra3aM1kOdvHf2yOZ4')
+bot.run('BOT TOKEN')
