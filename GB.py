@@ -8,7 +8,7 @@ from discord.ext import commands
 from bs4 import BeautifulSoup
 import requests
 #A Google Search API
-from googlesearch import search
+from duckduckgo_search import ddg
 
 #VARIABLES
 SCORES = {}
@@ -24,12 +24,12 @@ bot = commands.Bot(command_prefix = '?')
 async def on_ready():
 	print('Game-Bot is ready')
 	await bot.change_presence(activity=discord.Game(name="Game Boy"))
-	
-#The on_message event lets the bot listen for certain key-words	
+
+#The on_message event lets the bot listen for certain key-words
 @bot.event
 async def on_message(message):
 	if message.author == bot.user:
-		return			
+		return
 	if any(x in message.content.lower() for x in MUSIC_COMMANDS):
 		await message.channel.send('Choose a game franchise from the following list:')
 		file = open("text/music_list.txt")
@@ -76,7 +76,7 @@ async def on_message(message):
 			await message.channel.send(song)
 		if choice == "kingdom hearts":
 			game_music('kingdomhearts')
-			await message.channel.send(song)		
+			await message.channel.send(song)
 		if choice == "assassins creed":
 			game_music('seashanties')
 			await message.channel.send(song)
@@ -85,9 +85,18 @@ async def on_message(message):
 			await message.channel.send(song)
 		if choice == "splatoon":
 			game_music('splatoon')
-			await message.channel.send(song)	
-	#This line is necessary, otherwise it will play this event only when receiving messages and ignore the commands		
+			await message.channel.send(song)
+	#This line is necessary, otherwise it will play this event only when receiving messages and ignore the commands
 	await bot.process_commands(message)
+
+def process_link(query):
+	raw_result = ddg(query, safesearch='Moderate', time=None, max_results=1, output=None)
+	result = str(raw_result[0])
+	result_list = result.split(',')
+	raw_link = str(result_list[1])
+	link_list = raw_link.split(':')
+	link = "https" + str(link_list[2])[:-1]
+	return link
 
 #COMMANDS: Asynchronous functions where the trigger word is the name of the function(ctx).
 #Then the function sends message with the ctx.send()
@@ -97,7 +106,7 @@ async def on_message(message):
 async def ping(ctx):
 #I use an f string to issue a ping command
 	await ctx.send(f" GAME-BOT LATENCY:: [{round(bot.latency * 1000)}ms]")
-	
+
 #--------------------------------------------------------------------------#
 # SCOREBOARD FUNCTIONALITY
 @bot.command()
@@ -116,7 +125,7 @@ async def score(ctx, arg):
 	else:
 		SCORES[user] = 1
 		await ctx.send(user + ' Yay! Your first point!')
-		
+
 @bot.command()
 #put the role in here that you want to give scoreboard access to
 @commands.has_any_role('Admin')
@@ -127,7 +136,7 @@ async def remove_score(ctx, arg):
 		SCORES[user] -= 1
 		await ctx.send(user + " -1 point")
 	else:
-		await ctx.send(user + " not on the scoreboard")			
+		await ctx.send(user + " not on the scoreboard")
 @bot.command()
 #put the role in here that you want to give scoreboard access to
 @commands.has_any_role('Admin')
@@ -142,39 +151,40 @@ async def scores(ctx):
 		await ctx.send('No one has any points yet')
 	else:
 		await ctx.send('Points are as follows {USER : POINTS}:')
-		await ctx.send(SCORES)	
+		await ctx.send(SCORES)
 #--------------------------------------------------------------------#
-				
+
 @bot.command()
 async def hltb(ctx, *args):
 	# grab the first search result for the game (99% of the time is the proper HLTB website page you want)
 	title = args
 	query = "howlongtobeat.com" + str(title)
-	for link in search(query, num_results=1):
+	process_link(query)
+	# for link in search(query, num_results=1):
 		# Now the web-scraping begins
-		page = requests.get(link, headers={'User-Agent': 'Mozilla/5.0'})
-		soup = BeautifulSoup(page.content, 'html.parser')
+	page = requests.get(link, headers={'User-Agent': 'Mozilla/5.0'})
+	soup = BeautifulSoup(page.content, 'html.parser')
 		#----------------------
 		# GETTING THE GAME INFO
-		results = soup.find_all("div", {"class": "game_times"})
-		info = results[0]
-		INFO = info.get_text()
+	results = soup.find_all("div", {"class": "game_times"})
+	info = results[0]
+	INFO = info.get_text()
 		#-----------------------
 		# GETTING THE GAME TITLE
-		game_title = soup.find("title")
-		G_TITLE = game_title.get_text()
+	game_title = soup.find("title")
+	G_TITLE = game_title.get_text()
 		#-----------------------
 		# GETTING THE GAME ICON
-		game_images = soup.find_all("img", {"alt": "Box Art"})
-		images = game_images[0]
-		image = images['src']
-		print(image)
+	game_images = soup.find_all("img", {"alt": "Box Art"})
+	images = game_images[0]
+	image = images['src']
+	print(image)
 		#-----------------------
-		embed=discord.Embed(title=G_TITLE, url=link, description="", color=0x1300d9)
-		embed.set_thumbnail(url="https://howlongtobeat.com" + image)
-		embed.add_field(name="Estimated Completion Time", value=INFO, inline=True)
-		embed.set_footer(text="howlongtobeat.com")
-		await ctx.send(embed=embed)
-		
+	embed=discord.Embed(title=G_TITLE, url=link, description="", color=0x1300d9)
+	embed.set_thumbnail(url="https://howlongtobeat.com" + image)
+	embed.add_field(name="Estimated Completion Time", value=INFO, inline=True)
+	embed.set_footer(text="howlongtobeat.com")
+	await ctx.send(embed=embed)
+
 #Runs the bot and authorizes the bot with it's unique token
 bot.run('BOT TOKEN')
