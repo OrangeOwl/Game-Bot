@@ -16,7 +16,8 @@ MUSIC_COMMANDS = ['game-bot play some music', 'gamebot play some music', 'game-b
 song = []
 #COMMAND WORDS TO LISTEN FOR
 
-bot = commands.Bot(command_prefix = '?')
+intents = discord.Intents.default()
+bot = commands.Bot(command_prefix = '?', intents=intents)
 
 #EVENTS
 #A terminal command that lets me know the bot is running in the terminal
@@ -89,15 +90,6 @@ async def on_message(message):
 	#This line is necessary, otherwise it will play this event only when receiving messages and ignore the commands
 	await bot.process_commands(message)
 
-def process_link(query):
-	raw_result = ddg(query, safesearch='Moderate', time=None, max_results=1, output=None)
-	result = str(raw_result[0])
-	result_list = result.split(',')
-	raw_link = str(result_list[1])
-	link_list = raw_link.split(':')
-	link = "https" + str(link_list[2])[:-1]
-	return link
-
 #COMMANDS: Asynchronous functions where the trigger word is the name of the function(ctx).
 #Then the function sends message with the ctx.send()
 
@@ -152,20 +144,24 @@ async def scores(ctx):
 	else:
 		await ctx.send('Points are as follows {USER : POINTS}:')
 		await ctx.send(SCORES)
-#--------------------------------------------------------------------#
-
+#-------------------------------------------------------------------#
 @bot.command()
 async def hltb(ctx, *args):
 	# grab the first search result for the game (99% of the time is the proper HLTB website page you want)
 	title = args
 	query = "howlongtobeat.com" + str(title)
-	process_link(query)
+	raw_result = ddg(query, safesearch='Moderate', time=None, max_results=1, output=None)
+	result = str(raw_result[0])
+	result_list = result.split(',')
+	raw_link = str(result_list[1])
+	link_list = raw_link.split(':')
+	link = "https:" + str(link_list[2])[:-1]
 	# for link in search(query, num_results=1):
-		# Now the web-scraping begins
+	# Now the web-scraping begins
 	page = requests.get(link, headers={'User-Agent': 'Mozilla/5.0'})
 	soup = BeautifulSoup(page.content, 'html.parser')
-		#----------------------
-		# GETTING THE GAME INFO
+	#----------------------
+	# GETTING THE GAME INFO
 	results = soup.find_all("div", {"class": "game_times"})
 	info = results[0]
 	INFO = info.get_text()
@@ -187,4 +183,4 @@ async def hltb(ctx, *args):
 	await ctx.send(embed=embed)
 
 #Runs the bot and authorizes the bot with it's unique token
-bot.run('BOT TOKEN')
+bot.run('ODA0OTM4MTg0Njk3NzA4NTY1.YBTnGg.8kqBNrzUu7ra3aM1kOdvHf2yOZ4')
