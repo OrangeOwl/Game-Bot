@@ -16,7 +16,7 @@ MUSIC_COMMANDS = ['game-bot play some music', 'gamebot play some music', 'game-b
 song = []
 #COMMAND WORDS TO LISTEN FOR
 
-intents = discord.Intents.default()
+intents = discord.Intents.all()
 bot = commands.Bot(command_prefix = '?', intents=intents)
 
 #EVENTS
@@ -149,36 +149,46 @@ async def scores(ctx):
 async def hltb(ctx, *args):
 	# grab the first search result for the game (99% of the time is the proper HLTB website page you want)
 	title = args
-	query = "howlongtobeat.com" + str(title)
+	query = "howlongtobeat.com " + str(title)
 	raw_result = ddg(query, safesearch='Moderate', time=None, max_results=1, output=None)
-	result = str(raw_result[0])
-	result_list = result.split(',')
-	raw_link = str(result_list[1])
-	link_list = raw_link.split(':')
-	link = "https:" + str(link_list[2])[:-1]
-	# for link in search(query, num_results=1):
+	result = str(raw_result[0]).split(',')
+	raw_link = str(result[1])
+	#howlongtobeat now has urls in two formats: one that ends in "/game/ID" and the older "game.php?id=9037". They seem to be transitioning to "/game/ID" so that's what we'll use. But first we need the ID
+	try:
+		linksplit = raw_link.split('=')
+	except:
+		linksplit = raw_link.split('/')
+	#remove stray apostrophe from link
+	game_id = linksplit[-1].replace("'","")
+	print("this is the game ID:")
+	print(game_id)
+	link = "https://howlongtobeat.com/game/" + game_id
+	print(link)
 	# Now the web-scraping begins
 	page = requests.get(link, headers={'User-Agent': 'Mozilla/5.0'})
 	soup = BeautifulSoup(page.content, 'html.parser')
 	#----------------------
 	# GETTING THE GAME INFO
-	results = soup.find_all("div", {"class": "game_times"})
-	info = results[0]
-	INFO = info.get_text()
-		#-----------------------
-		# GETTING THE GAME TITLE
-	game_title = soup.find("title")
-	G_TITLE = game_title.get_text()
-		#-----------------------
+	results = soup.find_all("h5")
+	print(results)
+	MainStory = results[0].get_text()
+	MainPlus = results[1].get_text()
+	Completionist = results[2].get_text()
+	AllStyles = results[3].get_text()
+	# ---------------------
+	G_title = ' '.join(list(title))
 		# GETTING THE GAME ICON
-	game_images = soup.find_all("img", {"alt": "Box Art"})
+	game_images = soup.find_all("img")
 	images = game_images[0]
 	image = images['src']
 	print(image)
 		#-----------------------
-	embed=discord.Embed(title=G_TITLE, url=link, description="", color=0x1300d9)
-	embed.set_thumbnail(url="https://howlongtobeat.com" + image)
-	embed.add_field(name="Estimated Completion Time", value=INFO, inline=True)
+	embed=discord.Embed(title=G_title, url=link, description="", color=0x1300d9)
+	embed.set_thumbnail(url=image)
+	embed.add_field(name="Main Story", value=MainStory, inline=True)
+	embed.add_field(name="Main Story Plus", value=MainPlus, inline=True)
+	embed.add_field(name="Completionist", value=Completionist, inline=True)
+	embed.add_field(name="All Styles", value=AllStyles, inline=True)
 	embed.set_footer(text="howlongtobeat.com")
 	await ctx.send(embed=embed)
 
