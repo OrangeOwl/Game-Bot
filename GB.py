@@ -160,8 +160,6 @@ async def hltb(ctx, *args):
 		linksplit = raw_link.split('/')
 	#remove stray apostrophe from link
 	game_id = linksplit[-1].replace("'","")
-	print("this is the game ID:")
-	print(game_id)
 	link = "https://howlongtobeat.com/game/" + game_id
 	print(link)
 	# Now the web-scraping begins
@@ -170,7 +168,6 @@ async def hltb(ctx, *args):
 	#----------------------
 	# GETTING THE GAME INFO
 	results = soup.find_all("h5")
-	print(results)
 	MainStory = results[0].get_text()
 	MainPlus = results[1].get_text()
 	Completionist = results[2].get_text()
@@ -181,7 +178,6 @@ async def hltb(ctx, *args):
 	game_images = soup.find_all("img")
 	images = game_images[0]
 	image = images['src']
-	print(image)
 		#-----------------------
 	embed=discord.Embed(title=G_title, url=link, description="", color=0x1300d9)
 	embed.set_thumbnail(url=image)
