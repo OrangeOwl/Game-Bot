@@ -1,3 +1,6 @@
+####################
+# Importing all the important libraries
+####################
 import os
 import discord
 import asyncio
@@ -14,13 +17,15 @@ from duckduckgo_search import ddg
 SCORES = {}
 MUSIC_COMMANDS = ['game-bot play some music', 'gamebot play some music', 'game-bot play music', 'gamebot play music', 'game-bot music', 'gamebot music']
 song = []
-#COMMAND WORDS TO LISTEN FOR
 
+# Setting bot prefix and complying with Discord API standards
 intents = discord.Intents.all()
 bot = commands.Bot(command_prefix = '?', intents=intents)
 
-#EVENTS
-#A terminal command that lets me know the bot is running in the terminal
+####################
+# Events/Keyword Triggers
+####################
+
 @bot.event
 async def on_ready():
 	print('Game-Bot is ready')
@@ -29,9 +34,13 @@ async def on_ready():
 #The on_message event lets the bot listen for certain key-words
 @bot.event
 async def on_message(message):
+	# To ensure the bot can't respond to itself thus preventing command loops
 	if message.author == bot.user:
 		return
 	if any(x in message.content.lower() for x in MUSIC_COMMANDS):
+		####################
+		# The Music Playing Feature
+		####################
 		await message.channel.send('Choose a game franchise from the following list:')
 		file = open("text/music_list.txt")
 		music_list = file.read().split('\n')
@@ -39,7 +48,7 @@ async def on_message(message):
 		music_list.remove("")
 		await message.channel.send(music_list)
 		#------------------------------------
-		def game_music(arg):
+		def game_music(arg): # Command searches for requested game text file and posts random link from it
 			global song
 			file = open("text/games/" + arg + ".txt")
 			music = file.read().split('\n')
@@ -50,6 +59,7 @@ async def on_message(message):
 		def is_correct(m):
 			return m.author == message.author
 		#------------------------------------
+		# Stops bot from waiting forever
 		try:
 			entry = await bot.wait_for('message', check=is_correct, timeout=13.0)
 		except asyncio.TimeoutError:
@@ -90,7 +100,10 @@ async def on_message(message):
 	#This line is necessary, otherwise it will play this event only when receiving messages and ignore the commands
 	await bot.process_commands(message)
 
-#COMMANDS: Asynchronous functions where the trigger word is the name of the function(ctx).
+####################
+# Commands
+####################
+#Asynchronous functions where the trigger word is the name of the function(ctx).
 #Then the function sends message with the ctx.send()
 
 #COMMANDS
@@ -100,7 +113,9 @@ async def ping(ctx):
 	await ctx.send(f" GAME-BOT LATENCY:: [{round(bot.latency * 1000)}ms]")
 
 #--------------------------------------------------------------------------#
+####################
 # SCOREBOARD FUNCTIONALITY
+####################
 @bot.command()
 #put the role in here that you want to give scoreboard access to
 @commands.has_any_role('Admin')
@@ -145,6 +160,9 @@ async def scores(ctx):
 		await ctx.send('Points are as follows {USER : POINTS}:')
 		await ctx.send(SCORES)
 #-------------------------------------------------------------------#
+####################
+# How Long To Beat: Game Time Lookups/Web-scraping
+####################
 @bot.command()
 async def hltb(ctx, *args):
 	# grab the first search result for the game (99% of the time is the proper HLTB website page you want)
@@ -153,32 +171,33 @@ async def hltb(ctx, *args):
 	raw_result = ddg(query, safesearch='Moderate', time=None, max_results=1, output=None)
 	result = str(raw_result[0]).split(',')
 	raw_link = str(result[1])
-	#howlongtobeat now has urls in two formats: one that ends in "/game/ID" and the older "game.php?id=9037". They seem to be transitioning to "/game/ID" so that's what we'll use. But first we need the ID
+	#howlongtobeat now has urls in two formats: one that ends in "/game/ID" and the older "game.php?id=ID". So this try catch is to check if the older URL is what's propagating on a search. Otherwise some searches will fail
 	try:
 		linksplit = raw_link.split('=')
 	except:
 		linksplit = raw_link.split('/')
-	#remove stray apostrophe from link
+	#set game ID and remove stray apostrophe from link
 	game_id = linksplit[-1].replace("'","")
-	link = "https://howlongtobeat.com/game/" + game_id
-	print(link)
-	# Now the web-scraping begins
+	link = "https://howlongtobeat.com/game/" + game_id #create link
+	# Now the web-scraping begins using BeautifulSoup we need to parse it first
 	page = requests.get(link, headers={'User-Agent': 'Mozilla/5.0'})
 	soup = BeautifulSoup(page.content, 'html.parser')
 	#----------------------
 	# GETTING THE GAME INFO
-	results = soup.find_all("h5")
+	results = soup.find_all("h5") #finding all h5 elements and setting them into variables
 	MainStory = results[0].get_text()
 	MainPlus = results[1].get_text()
 	Completionist = results[2].get_text()
 	AllStyles = results[3].get_text()
 	# ---------------------
+	# GETTING THE GAME TITLE
 	G_title = ' '.join(list(title))
-		# GETTING THE GAME ICON
+	# GETTING THE GAME ICON
 	game_images = soup.find_all("img")
 	images = game_images[0]
 	image = images['src']
 		#-----------------------
+	# CREATING THE EMBEDED ELEMENT
 	embed=discord.Embed(title=G_title, url=link, description="", color=0x1300d9)
 	embed.set_thumbnail(url=image)
 	embed.add_field(name="Main Story", value=MainStory, inline=True)
