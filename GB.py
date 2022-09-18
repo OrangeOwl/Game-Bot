@@ -4,7 +4,6 @@
 import os
 import discord
 import asyncio
-#import requests
 import random
 from discord.ext import commands
 #For Web-Scraping
