@@ -9,7 +9,7 @@ from discord.ext import commands
 #For Web-Scraping
 from bs4 import BeautifulSoup
 import requests
-#A Google Search API
+#A DuckDuck Go Search API
 from duckduckgo_search import ddg
 
 #VARIABLES
