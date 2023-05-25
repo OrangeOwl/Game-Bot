@@ -9,8 +9,8 @@ from discord.ext import commands
 #For Web-Scraping
 from bs4 import BeautifulSoup
 import requests
-#A DuckDuck Go Search API
-from duckduckgo_search import ddg
+#API for HowLongToBeat
+from howlongtobeatpy import HowLongToBeat
 
 #VARIABLES
 SCORES = {}
@@ -164,47 +164,49 @@ async def scores(ctx):
 ####################
 @bot.command()
 async def hltb(ctx, *args):
-	# grab the first search result for the game (99% of the time is the proper HLTB website page you want)
-	title = args
-	query = "howlongtobeat.com " + str(title)
-	raw_result = ddg(query, safesearch='Moderate', time=None, max_results=1, output=None)
-	result = str(raw_result[0]).split(',')
-	raw_link = str(result[1])
-	#howlongtobeat now has urls in two formats: one that ends in "/game/ID" and the older "game.php?id=ID". So this try catch is to check if the older URL is what's propagating on a search. Otherwise some searches will fail
-	try:
-		linksplit = raw_link.split('=')
-	except:
-		linksplit = raw_link.split('/')
-	#set game ID and remove stray apostrophe from link
-	game_id = linksplit[-1].replace("'","")
-	link = "https://howlongtobeat.com/game/" + game_id #create link
-	# Now the web-scraping begins using BeautifulSoup we need to parse it first
-	page = requests.get(link, headers={'User-Agent': 'Mozilla/5.0'})
-	soup = BeautifulSoup(page.content, 'html.parser')
-	#----------------------
-	# GETTING THE GAME INFO
-	results = soup.find_all("h5") #finding all h5 elements and setting them into variables
-	MainStory = results[0].get_text()
-	MainPlus = results[1].get_text()
-	Completionist = results[2].get_text()
-	AllStyles = results[3].get_text()
-	# ---------------------
-	# GETTING THE GAME TITLE
-	G_title = ' '.join(list(title))
-	# GETTING THE GAME ICON
-	game_images = soup.find_all("img")
-	images = game_images[0]
-	image = images['src']
-		#-----------------------
-	# CREATING THE EMBEDED ELEMENT
-	embed=discord.Embed(title=G_title, url=link, description="", color=0x1300d9)
-	embed.set_thumbnail(url=image)
-	embed.add_field(name="Main Story", value=MainStory, inline=True)
-	embed.add_field(name="Main Story Plus", value=MainPlus, inline=True)
-	embed.add_field(name="Completionist", value=Completionist, inline=True)
-	embed.add_field(name="All Styles", value=AllStyles, inline=True)
-	embed.set_footer(text="howlongtobeat.com")
-	await ctx.send(embed=embed)
+        # join the args into a single string for the HLTB API to parse
+        title = ' '.join(str(i) for i in args)
+        #print(title)
+        def getURL(title):
+                # Put the Title through the HLTB API and grab the best result. This was taken whole cloth from the examples
+                results = HowLongToBeat().search(title, similarity_case_sensitive=False)
+                if results is not None and len(results) > 0:
+                        best_element = max(results, key=lambda element: element.similarity)
+                        return best_element
+                else:
+                        print('something is wrong')
+                        return None
+        game = getURL(title)
+        link = str(game.game_web_link)
+        #print(link)
+        # Now the web-scraping begins using BeautifulSoup we need to parse it first
+        page = requests.get(link, headers={'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:106.0) Gecko/20100101 Firefox/106.0'})
+        # print(page)
+        soup = BeautifulSoup(page.content, 'html.parser')
+        #----------------------
+        # GETTING THE GAME INFO
+        results = soup.find_all("h5") #finding all h5 elements and setting them into variables
+        MainStory = results[0].get_text()
+        MainPlus = results[1].get_text()
+        Completionist = results[2].get_text()
+        AllStyles = results[3].get_text()
+        # ---------------------
+        # GETTING THE GAME TITLE
+        G_title = ' '.join(list(title))
+        # GETTING THE GAME ICON
+        game_images = soup.find_all("img")
+        images = game_images[0]
+        image = images['src']
+                #-----------------------
+        # CREATING THE EMBEDED ELEMENT
+        embed=discord.Embed(title=G_title, url=link, description="", color=0x1300d9)
+        embed.set_thumbnail(url=image)
+        embed.add_field(name="Main Story", value=MainStory, inline=True)
+        embed.add_field(name="Main Story Plus", value=MainPlus, inline=True)
+        embed.add_field(name="Completionist", value=Completionist, inline=True)
+        embed.add_field(name="All Styles", value=AllStyles, inline=True)
+        embed.set_footer(text="howlongtobeat.com")
+        await ctx.send(embed=embed)
 
 #Runs the bot and authorizes the bot with it's unique token
 bot.run('BOT TOKEN')
