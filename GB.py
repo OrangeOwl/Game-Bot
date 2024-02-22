@@ -49,9 +49,7 @@ async def sync(interaction: discord.Interaction):
 async def hltb(interaction: discord.Interaction, game: str):
 	# join the args into a single string for the HLTB API to parse
     title = ' '.join(str(i) for i in {game})
-    #title = str({game})
     print(title)
-	#print(title)
     def getURL(title):
 		# Put the Title through the HLTB API and grab the best result. This was taken whole cloth from the examples
         results = HowLongToBeat().search(title, similarity_case_sensitive=False)
@@ -68,7 +66,6 @@ async def hltb(interaction: discord.Interaction, game: str):
         return
 	# Now the web-scraping begins, using BeautifulSoup we need to parse it first
     page = requests.get(link, headers={'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:106.0) Gecko/20100101 Firefox/106.0'})
-	# print(page)
     soup = BeautifulSoup(page.content, 'html.parser')
 	#----------------------
 	# GETTING THE GAME INFO
@@ -77,9 +74,7 @@ async def hltb(interaction: discord.Interaction, game: str):
     MainPlus = results[1].get_text()
     Completionist = results[2].get_text()
     AllStyles = results[3].get_text()
-	# ---------------------
-	# GETTING THE GAME TITLE
-    #G_title = ' '.join(list(title))
+
 	# GETTING THE GAME ICON
     game_images = soup.find_all("img")
     images = game_images[0]
