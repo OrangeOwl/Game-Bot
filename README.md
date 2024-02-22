@@ -14,6 +14,7 @@ If you want to download this source code for editing yourself, follow the steps 
   <li>Put your unqiue token into the GB.py file, on the bottom line where it says client.run</li>
 </ol> 
 
-You're all set to run the python script and get your bot running! 
+You're all set to run the python script and get your bot running!
+
 Ideally also set it up to run and restart automatically on the OS hosting it to ensure the bot remains active and to minimize downtime
 
