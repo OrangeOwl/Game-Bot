@@ -1,6 +1,6 @@
 # Game-Bot
 
-A Video Game Discord bot that can run various commands, aimed at giving you info regarding various video games
+A Video Game Discord bot that can run various commands, aimed primarily at giving you info regarding the length of video games
 
 <h2>Instructions for Installing and Running it Yourself</h2>
 If you want to download this source code for editing yourself, follow the steps below:
